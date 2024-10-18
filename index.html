@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition System</title>
+</head>
+<body>
+    <h1>Face Recognition System</h1>
+    <!-- Button to start attendance -->
+    <p>Choose an option:</p>
+    <button onclick="window.location.href='/attendance'">Start Attendance</button>
+    <!-- Form to register a new person -->
+    <h2>Register New Person</h2>
+    <form id="newPersonForm" onsubmit="registerNewPerson(event)">
+        <label for="name">Enter Name:</label>
+        <input type="text" id="name" name="name" required>
+        <button type="submit">Register</button>
+    </form>
+    <!-- Display response message after registration -->
+    <div id="responseMessage"></div>
+    <!-- Captured image display -->
+    <h3>Captured Image</h3>
+    <img id="capturedImage" src="" alt="Captured Image" style="display: none;">
+    <script>
+        // Function to handle the registration of a new person
+        function registerNewPerson(event) {
+            event.preventDefault();  // Prevent the form from submitting normally
+            const name = event.target.name.value;  // Get the name from the input field
+            const responseMessage = document.getElementById("responseMessage");
+            // Send the registration request to the Flask server
+            fetch("/newPerson", {
+                method: "POST",
+                body: JSON.stringify({ name }),  // Send the name as JSON
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display success or error message
+                if (data.message) {
+                    responseMessage.innerText = data.message;
+                    loadCapturedImage();  // Load and display the captured image
+                } else {
+                    responseMessage.innerText = data.error || "An error occurred during registration.";
+                }
+            })
+            .catch(error => {
+                responseMessage.innerText = "An error occurred: " + error.message;
+            });
+        }
+        // Function to load and display the captured image
+        function loadCapturedImage() {
+            const capturedImage = document.getElementById("capturedImage");
+            capturedImage.src = `/capture_image?${new Date().getTime()}`;  // Prevent caching by appending timestamp
+            capturedImage.style.display = "block";  // Show the image after it's captured
+        }
+    </script>
+</body>
+</html>
